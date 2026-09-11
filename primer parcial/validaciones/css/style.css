@@ -14,4 +14,15 @@ header{
     background-color: chartreuse;
     color: beige;
     padding: 1rem;
+    text-align: center;
+}
+
+header a {
+    color: brown;
+
+}
+
+main {
+    max-width: 960px;
+    
 }
