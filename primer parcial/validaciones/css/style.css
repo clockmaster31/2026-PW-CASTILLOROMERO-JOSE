@@ -24,5 +24,26 @@ header a {
 
 main {
     max-width: 960px;
-    
+
+}
+
+footer {
+    text-align: center;
+    color: darkmagenta;
+    font-size: 875px;
+}
+
+
+.catalogo{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+
+}
+
+.tarjeta {
+    background-color: blanchedalmond;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
 }
