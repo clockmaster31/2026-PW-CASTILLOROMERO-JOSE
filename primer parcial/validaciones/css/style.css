@@ -64,3 +64,20 @@ footer {
 .tarjeta a:hover{
   text-decoration: underline;
 }
+
+.formulario-registro {
+    background-color: aquamarine;
+    color: darkturquoise;
+}
+
+input:hover{
+    color: cornflowerblue;
+    align-content: space-evenly;
+    size: 230px;
+}
+
+button:hover{
+    color: darkgoldenrod;
+    background-color: cornflowerblue;
+    size: 230px;
+}

@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <title>Registrar Asistencia - CECyT 9</title>
   <link rel="stylesheet" href="./css/style.css">
+  <script>
+    function subida(){
+      alert("Subiendo formulario");
+    }
+    function procesando(){
+      alert("procesando");
+    }
+  </script>
 </head>
 <body>
 
@@ -11,13 +19,15 @@
     <a href="./detalle.html">Volver a Taller</a>
   </header>
   <main>
-    <form class="formulario-registro" action="">
+    <form class="formulario-registro" action="" onsubmit="subida">
       <h1>Registrar asistencia</h1>
       <label for="Nombre">Nombre:</label>
-      <input type="text" name="nombre" id="nombre" required>
+      <input type="text" name="nombre" id="nombre" required minlength="3" placeholder="nombre" pattern="[a-z][A-Z]{}">
+      <span class="mensaje-error">Escribe al menos 3 letras.</span>
       <label for="boleta">Numero de Boleta:</label>
-      <input type="text" name="boleta" id="boleta" required>
-      <button type="submit">Registrar</button>
+      <input type="text" name="boleta" id="boleta" required minlength="10" placeholder="min 10 numeros" pattern="[0-9]{10}">
+      <span class="mensaje-error">La boleta debe tener 10 dígitos numéricos.</span>
+      <button type="submit" action="">Registrar</button>
     </form>
   </main>
 
