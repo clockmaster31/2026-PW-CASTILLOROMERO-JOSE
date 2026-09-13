@@ -1,0 +1,42 @@
+div {
+    background-color: blueviolet;
+    text-align: center;
+    align-content: center;
+
+
+}
+
+.container {
+
+    background-color: darkslategrey;
+    color: white;
+    text-align: center;
+    align-content: center;
+}
+
+.titulocontent {
+    color: burlywood;
+    background-color: deeppink;
+    text-align: center;
+    align-content: center;
+
+}
+
+.tables {
+    background-color: coral;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-style: italic;
+    text-align: center;
+    align-content: center;
+}
+
+body {
+    background-color: oldlace;
+    text-align: center;
+    align-content: center;
+
+}
+img {
+    width: 200px;
+    max-height: fit-content;
+}
