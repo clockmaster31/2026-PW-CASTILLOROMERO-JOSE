@@ -3,40 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <title>Registrar Asistencia - CECyT 9</title>
-  <link rel="stylesheet" href="./css/style.css">
-  <script>
-    function subida(){
-      alert("Subiendo formulario");
-    }
-    
-  </script>
+  <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body>
-
   <header>
-    <a href="./detalle.html">Volver a Taller</a>
+    <a href="./detalle.html">Volver al taller</a>
   </header>
   <main>
-    <form class="formulario-registro" action="" id="form-registro" novalidate>
-      <h1>Registrar asistencia</h1>
-      <label for="nombre">Nombre:</label>
-      <input type="text" name="nombre" id="nombre" required placeholder="nombre"  >
+    <form action="" class="formualrio-registro" id="form-registro" novalidate>
+      <h1>Registrar Asistencia</h1>
+      <label for="nombre">Nombre: </label>
       <span class="error" id="error-nombre"></span>
-
-      <label for="boleta">Numero de Boleta:</label>
-      <input type="text" name="boleta" id="boleta" placeholder="10 numeros" ">
+      <input type="text" name="nombre" id="nombre" required>
+      <label for="boleta">Número de Boleta: </label>
+      <input type="text" id="boleta" name="boleta" required>
       <span class="error" id="error-boleta"></span>
-
-      <label for="" class="Fecha">Fecha de registro (DD/MM/AAAA)</label>
-      <input type="text" name="fecha" id="fecha" required placeholder="(DD/MM/AAAA)">
+      <label for="">Fecha de Registro (DD/MM/AAAA)</label>
+      <input type="text" id="fecha" name="fecha" placeholder="DD/MM/AAAA" required>
       <span class="error" id="error-fecha"></span>
-
-      <p class="mensaje-exito" id="mensaje-exito"></p>
-
       <button type="submit">Registrar</button>
+      <p class="mensaje-exito" id="mensaje-exito"></p>
     </form>
   </main>
+  <script src="./js/validaciones.js">
 
-    <script src="./js/validaciones.js"></script>
+  </script>
 </body>
 </html>
