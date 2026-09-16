@@ -32,7 +32,7 @@ if(typeof document!== 'undefined') {
         for(const campo of Object.keys(patrones)){ // keys son los intefecadores 
 
             const input = document.getElementById(campo);
-            const errorSpan = document.getElementById('error -${campo}');
+            const errorSpan = document.getElementById(` error -{campo}` );
 
         }
 
