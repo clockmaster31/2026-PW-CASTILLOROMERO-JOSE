@@ -28,9 +28,16 @@ console.log(llenos.map((t)=> t.nombre))
 // TODO: find — encuentra el PRIMER taller impartido por 'Ing. María López'
 
 console.log("tratando el find (espero que no explote esta madre)")
-const busqueda = talleres.find((t)=> t.nombre == "Ing. María López");
+const busqueda = talleres.find((t)=> t.instructor == "Ing. María López");
 console.log(busqueda.map((t)=> t.nombre ));
 
 // TODO: reduce — calcula `totalInscritos`, la suma de inscritos de todos los talleres
 
+console.log("Aver si esto jala (reduce)")
+const totalInscritos = talleres.reduce((total, t)=> total + t.inscritos, 0)
+console.log(totalInscritos.map((t)=> t.inscritos))
+
 // TODO: filter + map encadenados — nombres de los talleres que SÍ tienen cupo disponible
+console.log("Quizas jala este")
+const cupoDisponible = talleres.filter((t) => t.cupo > t.inscritos).map((t)=> t.nombre)
+console.log(cupoDisponible.filter((t)=> t.nombre));

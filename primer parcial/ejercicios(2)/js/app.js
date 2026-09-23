@@ -30,7 +30,14 @@ formArreglos.addEventListener('submit', (evento) =>{
         case 'map' :
             resultado = talleres.map((t)=> t.nombre).join('\n');
             break;
+        case'find':
+         resultado = talleres.map((t)=> t.nombre == "Ing. María López").join('\n');
+         break;
+        case 'filter':
+        resultado = talleres.map((t) => t.inscritos >= t.cupo).join('\n');
+        break;
     }
+
 
 
     resultadoArreglos.textContent = resultado;
