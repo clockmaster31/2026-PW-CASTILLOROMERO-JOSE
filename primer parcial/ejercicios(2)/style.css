@@ -13,7 +13,10 @@ header {
 
 .tabla-scroll{
     align-items: center;
-    background-color: bisque;
+    background-color: black;
     color: cornsilk;
     text-align: center;
+}
+body {
+    background-color: burlywood;
 }
