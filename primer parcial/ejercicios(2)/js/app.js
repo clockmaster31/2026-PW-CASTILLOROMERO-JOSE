@@ -8,7 +8,7 @@ const talleres = [
 ];
 
 
-function pintarTabla(){
+function pintarTabla(nombre, instructor, cupo, inscritos){
     //debe de obtener la tabla y rellenarla con los datos de talleres
      const tablaTalleres = document.getElementById("tabla-talleres").getElementsByTagName('tbody')[0];
     const nuevaFila = tablaTalleres.insertRow(-1);
@@ -37,6 +37,7 @@ const selectOperacionArreglo = document.getElementById('operacion-arreglo');
 
 formArreglos.addEventListener('submit', (evento) =>{
     evento.preventDefault();
+    borrarTabla();
     const operacion = selectOperacionArreglo.value;
 
     let resultado;
