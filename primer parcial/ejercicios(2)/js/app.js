@@ -53,9 +53,9 @@ formArreglos.addEventListener('submit', (evento) =>{
             resultado = talleres.map((t) => t.nombre);
             break;
         case'find':
-         const encontrado = talleres.find(taller => taller.instructor === 'Ing. María López')
-            pintarTabla(encontrado.nombre,encontrado.instructor,encontrado.cupo,encontrado.inscritos);
-            resultado = encontrado.nombre;
+         const busqueda = talleres.find(taller => taller.instructor === 'Ing. María López')
+            pintarTabla(busqueda.nombre,busqueda.instructor,busqueda.cupo,busqueda.inscritos);
+            resultado = busqueda.nombre;
             break;
         case 'filter':
          const llenos = talleres.filter((t) => t.inscritos >= t.cupo);
