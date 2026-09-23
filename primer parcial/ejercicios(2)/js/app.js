@@ -10,20 +10,26 @@ const talleres = [
 
 function pintarTabla(){
     //debe de obtener la tabla y rellenarla con los datos de talleres
-    const tbody = document.querySelector("#tabla-talleres tbody");
-    tbody.innerHTML = "";
-     listaTalleres.forEach((taller) => {
-         const fila = document.createElement("tr");
-         fila.innerHTML = `
-      <td>${taller.nombre}</td>
-      <td>${taller.instructor}</td>
-      <td>${taller.cupo}</td>
-      <td>${taller.inscritos}</td>
-    `;
-       tbody.appendChild(fila);
-    });
+     const tablaTalleres = document.getElementById("tabla-talleres").getElementsByTagName('tbody')[0];
+    const nuevaFila = tablaTalleres.insertRow(-1);
 
+    const celdaNombre = nuevaFila.insertCell(0);
+    const celdaInstructor = nuevaFila.insertCell(1);
+    const celdaCupo = nuevaFila.insertCell(2);
+    const celdaInscritos = nuevaFila.insertCell(3);
+
+    celdaNombre.textContent = nombre;
+    celdaInstructor.textContent = instructor;
+    celdaCupo.textContent = cupo;
+    celdaInscritos.textContent = inscritos;
+    
 }
+
+function borrarTabla() {
+    const body = document.getElementById("tabla-talleres").getElementsByTagName('tbody')[0];
+    body.innerHTML = "";
+}
+
 
 const formArreglos = document.getElementById('form-arreglos');
 const resultadoArreglos = document.getElementById('resultado-arreglo');
@@ -38,17 +44,24 @@ formArreglos.addEventListener('submit', (evento) =>{
     switch(operacion){
         case 'forEach':
             resultado = talleres.map((t) => `- ${t.nombre} (${t.inscritos}/${t.cupo})`).join('\n');
+            talleres.forEach(taller => {
+                pintarTabla(taller.nombre, taller.instructor, taller.cupo, taller.inscritos);
+            });
             break;
-        
         case 'map' :
-            resultado = talleres.map((t)=> t.nombre).join('\n');
+             talleres.map((t)=> pintarTabla(t.nombre, "","",""));
+            resultado = talleres.map((t) => t.nombre);
             break;
         case'find':
-         resultado = talleres.map((t)=>     `- ${t.instructor == "Ing. María López"}  `).join('\n');
-         break;
+         const encontrado = talleres.find(taller => taller.instructor === 'Ing. María López')
+            pintarTabla(encontrado.nombre,encontrado.instructor,encontrado.cupo,encontrado.inscritos);
+            resultado = encontrado.nombre;
+            break;
         case 'filter':
-        resultado = talleres.map((t) => t.inscritos >= t.cupo).join('\n');
-        break;
+         const llenos = talleres.filter((t) => t.inscritos >= t.cupo);
+            llenos.forEach(taller =>{pintarTabla(taller.nombre,taller.instructor, taller.cupo,taller.inscritos)});
+            resultado = llenos.map((t)=> t.nombre);
+            break;
     }
 
 

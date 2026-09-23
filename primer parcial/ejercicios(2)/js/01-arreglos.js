@@ -35,9 +35,9 @@ console.log(busqueda.map((t)=> t.nombre ));
 
 console.log("Aver si esto jala (reduce)")
 const totalInscritos = talleres.reduce((total, t)=> total + t.inscritos, 0)
-console.log(totalInscritos.map((t)=> t.inscritos))
+console.log(totalInscritos)
 
 // TODO: filter + map encadenados — nombres de los talleres que SÍ tienen cupo disponible
 console.log("Quizas jala este")
-const cupoDisponible = talleres.filter((t) => t.cupo > t.inscritos).map((t)=> t.nombre)
-console.log(cupoDisponible.filter((t)=> t.nombre));
+const cupoDisponible = talleres.filter((t) => t.cupo > t.inscritos).map(t=> t.nombre)
+console.log(cupoDisponible);
