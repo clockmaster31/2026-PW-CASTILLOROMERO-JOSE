@@ -44,7 +44,7 @@ formArreglos.addEventListener('submit', (evento) =>{
             resultado = talleres.map((t)=> t.nombre).join('\n');
             break;
         case'find':
-         resultado = talleres.map((t)=> t.instructor == "Ing. María López").join('\n');
+         resultado = talleres.map((t)=>     `- {t.instructor == "Ing. María López"}  `).join('\n');
          break;
         case 'filter':
         resultado = talleres.map((t) => t.inscritos >= t.cupo).join('\n');
