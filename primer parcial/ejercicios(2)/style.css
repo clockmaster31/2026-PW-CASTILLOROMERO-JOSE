@@ -1,0 +1,19 @@
+header {
+    text-align: center;
+    background-color: beige;
+    color: black;
+    align-items: center;
+     }
+
+.ejercico {
+    background-color: aquamarine;
+    text-align: center;
+    color: black;
+}
+
+.tabla-scroll{
+    align-items: center;
+    background-color: bisque;
+    color: cornsilk;
+    text-align: center;
+}
