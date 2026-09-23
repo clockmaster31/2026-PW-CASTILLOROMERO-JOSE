@@ -28,12 +28,14 @@ div {
     font-style: italic;
     text-align: center;
     align-content: center;
+    align-items: center;
 }
 
 body {
     background-color: oldlace;
     text-align: center;
     align-content: center;
+    align-items: center;
 
 }
 img {

@@ -19,4 +19,7 @@ header {
 }
 body {
     background-color: burlywood;
+     align-content: center;
+    align-items: center;
+    text-align: center;
 }
