@@ -72,53 +72,62 @@ formArreglos.addEventListener('submit', (evento) =>{
 
 // segunda parte 
 
-const formularioobjeto = document.getElementById(`formulario-objeto`);
-const resultadoobjeto = document.getElementById(`resultado-objeto`);
+const formularioobjeto = document.getElementById('formulario-objeto');
+const resultadoobjeto = document.getElementById('resultado-objeto');
 
     formularioobjeto.addEventListener('submit', (evento) => {
+        evento.preventDefault();
+       
 
         const taller = {
 
-    nombre : document.getElementById(`obj-nombre`).value,
-    instructor : document.getElementById(`obj-instructor`).value,
-    cupo : Number(document.getElementById(`obj-cupo`).value),
-    inscritos : Number(document.getElementById(`obj-inscritos`).value)
+    nombre : document.getElementById('obj-nombre').value,
+    instructor : document.getElementById('obj-instructor').value,
+    cupo : Number(document.getElementById('obj-cupo').value),
+    inscritos : Number(document.getElementById('obj-inscritos').value)
      };
 
-     const operacion = document.getElementById(`operacion-objeto`);
-
+     const operacion = document.getElementById('operacion-objeto1').value;
+     alert(operacion); 
      let resultado;
 
      switch(operacion){
+        //alert(operacion);
 
-        case 'keys':
-
-        break;
-
-
+        case 'keys':    
+            resultado=JSON.stringify(Object.keys(taller));
+             alert(12);
+            break;
         case 'values':
-
-        break;
-
-
+            resultado=JSON.stringify(Object.values(taller));
+            break;
         case 'entries':
-
-        break;
-
-
+            resultado= Object.entries(taller).map(([campo, valor]) => `${campo}: ${valor}`).join('\n');
+            break;
         case 'stringify':
-
-        break;
-
-
+            const textoJsonstring = JSON.stringify(taller, null, 2);
+            resultado = [ '', textoJsonstring ].join('\n');
+            break;
         case 'roundTrip':
+            const textoJson = JSON.stringify(taller, null, 2);
+            const objetoDeVuelta = JSON.parse(textoJson);
 
+            resultado   = [
+                '',
+                textoJson,
+                '',
+                `tipo: ${typeof objetoDeVuelta}`,
+                objetoDeVuelta.nombre
+            ].join('\n');
 
-        break;
+            break;
 
-
-
+            default:
+                alert("no hay nada");
+            break;
      }
+
+     
 
      resultadoobjeto.textContent = resultado;
 });
