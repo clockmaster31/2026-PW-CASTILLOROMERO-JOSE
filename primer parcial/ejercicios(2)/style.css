@@ -23,3 +23,7 @@ body {
     align-items: center;
     text-align: center;
 }
+table{
+    border-style: dashed;
+    border-radius: 2cm;
+}

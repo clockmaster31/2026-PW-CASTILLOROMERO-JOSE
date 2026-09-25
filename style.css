@@ -29,6 +29,8 @@ div {
     text-align: center;
     align-content: center;
     align-items: center;
+    border-radius: 2cm;
+    border-style: dashed;
 }
 
 body {
