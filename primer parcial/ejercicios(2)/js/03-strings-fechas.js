@@ -31,7 +31,7 @@ console.log(`${nombre} se inscribio en un taller con cupo para ${cupo} personas`
 
 // TODO: Date — completa esta función para construir un objeto Date a partir
 // de un texto 'DD/MM/AAAA' (recuerda: los meses en Date empiezan en 0)
-console.log ('Ejemplo de Date')
+console.log ('Ejemplo de Date');
 function fechaDesdeTexto(textoFecha) {
   // TODO
   const[dia, mes, año] = textoFecha.split('/').map(Number);
