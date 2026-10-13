@@ -1,16 +1,15 @@
 {
   "name": "primerproyecto",
   "version": "1.0.0",
-  "description": "Intentadoquejale",
-  "license": "ISC",
-  "author": "JoseEnriqueCastilloRomero",
-  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "dev":"next dev",
     "build":"next build",
     "start":"next start"
   },
+  "author": "Demonassit",
+  "license": "ISC",
+  "description": "",
   "dependencies": {
     "express": "^5.2.1",
     "next": "^16.4.0",
