@@ -12,4 +12,4 @@ const pool = mysql.createPool({
     password:'MJ15JE31',//AREGLAR
     database:'cecyt9_local',
     dateStrings:true,
-})
+});
