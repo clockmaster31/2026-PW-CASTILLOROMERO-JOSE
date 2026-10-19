@@ -3,7 +3,7 @@ const pool = require('../bd-local');
 //llama base
 //objeto usuario
 
-const COLUMNAS_PUBLICAS = 'id,nombre, correo, boleta rol';
+const COLUMNAS_PUBLICAS = 'id,nombre, correo, boleta, rol';
 
 //consultar a todos         //llamamos base    //que jala               //donde   y por cual 
 async function listar() {
@@ -16,7 +16,7 @@ async function listar() {
 //obtener por id 
 
 async function obtenerPorId() {
-    const[filas] =await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM usuarios WHERE id= ?`);
+    const[filas] =await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM usuarios WHERE id = ?`);
 
     return filas[0];
     
@@ -73,10 +73,14 @@ async function buscarPorCorreoConHash(correo) {
 }
 
 //debemos crear los modelos de las tablas talleres y asistencia 
-//taller tiene registrar alumno al taller, consultar todos los talleres, 
+//taller tiene registrar alumno al taller,
+
+
 //asistencia tiene registrar asistencia, consultar asistencia del taller 
 // dos archivvvos (talleres y asistencia_modelo)
-//base en teams 
+
+
+
 
 //oara hacer esto a una api hay que exportar
 
