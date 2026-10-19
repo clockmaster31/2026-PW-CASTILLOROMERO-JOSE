@@ -1,8 +1,8 @@
 const pool = require('../bd-local');
 const { listar } = require('./usuarios_modelo');
 
-async function cupo_taller_id() {
-    const[cupo] =await pool.query(`SELECT cupo FROM talleres WHERE id = "?"`);
+async function cupo_taller_id({nombre}) {
+    const[cupo] =await pool.query(`SELECT cupo FROM talleres WHERE id = ${nombre}`);
 
     return cupo[0];
 }
