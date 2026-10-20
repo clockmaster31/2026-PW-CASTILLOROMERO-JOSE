@@ -3,7 +3,7 @@
 function validarBoleta(){
 if(typeof boleta !== 'string') return false;
 const numeros_permitidos = [1,2,3,4,5,6,7,8,9,0];
-return boleta.includes(numeros_permitidos);
+return boleta.includes(numeros_permitidos) = 10;
 }
 
 function validarCorreo(){

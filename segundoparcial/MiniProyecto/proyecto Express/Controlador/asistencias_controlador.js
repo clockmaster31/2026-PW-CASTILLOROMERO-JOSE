@@ -24,3 +24,4 @@ async function consultarasistencia(req, res) {
 
     
 }
+
