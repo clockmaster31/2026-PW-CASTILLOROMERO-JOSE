@@ -1,21 +1,19 @@
 //tarea 2 de las 3 funciones para validar
 
-function validarBoleta(){
-if(typeof boleta !== 'string') return false;
-const numeros_permitidos = [1,2,3,4,5,6,7,8,9,0];
-return boleta.includes(numeros_permitidos) = 10;
+function validarCorreo(correo){
+    if(typeof correo !== 'string') return false;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim());
 }
 
-function validarCorreo(){
-if(typeof correo !== 'string') return false;
-return correo.includes("@");
+function validarBoleta(boleta){
+    if(typeof boleta !== 'string' && typeof boleta !== 'number') return false;
+    return /^\d{10}$/.test(String(boleta));
 }
 
-function validarContrasena(){
-    if (typeof contrasena !== 'string') return false;
-    return contrasena >= 8;
+function validarContrasena(contrasena){
+    if(typeof contrasena !== 'string') return false;
+    return contrasena.length >= 8;
 }
 
-module.exports={validarBoleta, validarContrasena, validarCorreo};
-
+module.exports = {validarBoleta, validarContrasena, validarCorreo}
 //tarea:
