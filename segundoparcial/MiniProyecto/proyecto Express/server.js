@@ -28,6 +28,12 @@ app.post('/eco', (req, res)=>{
 
 //levantar el servicio
 
+app.get("/", (req, res) => {
+  res.json({
+    mensaje: "API de Registro de Asistencia - CECyT 9 funcionando correctamente",
+  });
+});
+
 app.listen(PORT, () =>{
     console.log(`Sevidor escuchando en el puerto: ${PORT}`);
 });

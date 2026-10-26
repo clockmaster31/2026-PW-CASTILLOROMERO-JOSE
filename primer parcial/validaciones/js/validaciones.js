@@ -45,5 +45,5 @@ if (typeof document !== 'undefined') {
         }
         const mensajeExito = document.getElementById('mensaje-exito');
         mensajeExito.textContent = formularioValido ? 'Registro exitoso!' : '';       
-    })
+    });
 }
