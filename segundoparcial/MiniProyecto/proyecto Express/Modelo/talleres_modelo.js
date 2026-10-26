@@ -1,65 +1,45 @@
-const pool = require('../bd-local');
+const pool = require('../bd-local')
+const COLUMNAS_TALLERES = "id, nombre, instructor, fecha, cupo, created_at"
 
-const COLUMNAS_TALLER = 'id, nombre, descripcion, cupo';
-
-//consultar todos los talleres
-async function listarTalleres() {
-    const [filas] = await pool.query(`SELECT ${COLUMNAS_TALLER} FROM talleres ORDER BY id`);
-    return filas;
+async function listar() {
+    const [filas] = await pool.query(`SELECT ${COLUMNAS_TALLERES} FROM talleres ORDER BY fecha`)
+    return filas
 }
 
-//obtener taller por id
-async function obtenerTallerPorId(id) {
-    const [filas] = await pool.query(`SELECT ${COLUMNAS_TALLER} FROM talleres WHERE id = ?`, [id]);
+async function obtenerPorId(id) {
+    const [filas] = await pool.query(`SELECT ${COLUMNAS_TALLERES} FROM talleres WHERE id = ?`, [id])
+    return filas[0]
+}
+
+async function registrarAlumnoTaller({tallerId, nombreAlumno, boleta}) {
+  await pool.query(
+    `INSERT INTO asistencias (taller_id, nombre_alumno, boleta) VALUES (?, ?, ?)`,
+    [tallerId, nombreAlumno, boleta]
+  )
+
+  const [filas] = await pool.query(
+        `SELECT * FROM asistencias WHERE taller_id = ? AND boleta = ? ORDER BY fecha_registro DESC LIMIT 1`,
+        [tallerId, boleta]
+    )
+    return filas[0]
+}
+
+async function crear({nombre, instructor, fecha, cupo}) {
+    await pool.query(
+        `INSERT INTO talleres (id, nombre, instructor, fecha, cupo) 
+         VALUES (UUID(), ?, ?, ?, ?)`, 
+        [nombre, instructor, fecha, cupo]
+    );
+
+    const [filas] = await pool.query(
+        `SELECT id, nombre, instructor, fecha, cupo, created_at 
+         FROM talleres 
+         WHERE nombre = ? AND instructor = ? 
+         ORDER BY created_at DESC LIMIT 1`,
+        [nombre, instructor]
+    );
+    
     return filas[0];
 }
 
-//crear taller
-async function crearTaller({nombre, descripcion, cupo}) {
-    const [info] = await pool.query(
-        'INSERT INTO talleres (nombre, descripcion, cupo) VALUES (?, ?, ?)', [nombre, descripcion ?? null, cupo ?? null]
-    );
-    return obtenerTallerPorId(info.insertId);
-}
-
-//actualizar taller
-async function actualizarTaller(id, {nombre, descripcion, cupo}) {
-    const cambios = Object.entries({nombre, descripcion, cupo}).filter(([, valor]) => valor !== undefined);
-    if(cambios.length === 0) return obtenerTallerPorId(id);
-
-    const columnas = cambios.map(([columna]) => `${columna} = ?`).join(', ');
-
-    const [info] = await pool.query(`UPDATE talleres SET ${columnas} WHERE id = ?`, [...cambios.map(([, valor]) => valor), id]);
-    if(info.affectedRows === 0) return undefined;
-    return obtenerTallerPorId(id);
-}
-
-//eliminar taller
-async function eliminarTaller(id) {
-    const [info] = await pool.query('DELETE FROM talleres WHERE id = ?', [id]);
-    return info.affectedRows > 0;
-}
-
-//registrar alumno al taller
-async function registrarAlumno({usuario_id, taller_id}) {
-    const [info] = await pool.query(
-        'INSERT INTO taller_alumnos (usuario_id, taller_id) VALUES (?, ?)', [usuario_id, taller_id]
-    );
-    return {id: info.insertId, usuario_id, taller_id};
-}
-
-//consultar alumnos inscritos en un taller
-async function listarAlumnosTaller(taller_id) {
-    const [filas] = await pool.query(`
-        SELECT u.id, u.nombre, u.correo, u.boleta
-        FROM taller_alumnos ta
-        JOIN usuarios u ON u.id = ta.usuario_id
-        WHERE ta.taller_id = ?
-        ORDER BY u.nombre`, [taller_id]);
-    return filas;
-}
-
-module.exports = {listarTalleres, obtenerTallerPorId, crearTaller, actualizarTaller, eliminarTaller, registrarAlumno, listarAlumnosTaller}
-
-
-
+module.exports = {listar, obtenerPorId, crear}

@@ -1,88 +1,105 @@
-const pool = require('../bd-local');
+const pool = require("../bd-local")
 
-//llama base
-//objeto usuario
+const COLUMNAS_PUBLICAS = "id, nombre, correo, boleta, rol"
 
-const COLUMNAS_PUBLICAS = 'id,nombre, correo, boleta, rol';
+function publico(usuario) {
+    if (!usuario) return undefined;
+    return {
+        id: usuario.id,
+        nombre: usuario.nombre,
+        correo: usuario.correo,
+        boleta: usuario.boleta,
+        rol: usuario.rol
+    };
+}
 
-//consultar a todos         //llamamos base    //que jala               //donde   y por cual 
+async function revisarDuplicado({ correo, boleta }, idPropio = null) {
+    if (correo) {
+        const [res] = await pool.query(
+            "SELECT id FROM usuarios WHERE LOWER(correo) = LOWER(?) AND (? IS NULL OR id <> ?)", 
+            [correo, idPropio, idPropio]
+        );
+        if (res.length > 0) {
+            const error = new Error('Duplicate entry');
+            error.code = 'ER_DUP_ENTRY';
+            throw error;
+        }
+    }
+    if (boleta) {
+        const [res] = await pool.query(
+            "SELECT id FROM usuarios WHERE boleta = ? AND (? IS NULL OR id <> ?)", 
+            [boleta, idPropio, idPropio]
+        );
+        if (res.length > 0) {
+            const error = new Error('Duplicate entry');
+            error.code = 'ER_DUP_ENTRY';
+            throw error;
+        }
+    }
+}
+
 async function listar() {
-    const[filas] =await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM usuarios ORDER BY id`);
-
-    return filas;
-    
+    const [filas] = await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM usuarios ORDER BY id`)
+    return filas.map(publico);
 }
 
-//obtener por id 
+//Obtener por ID
 
-async function obtenerPorId() {
-    const[filas] =await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM usuarios WHERE id = ?`);
-
-    return filas[0];
-    
+async function obtenerPorId(id) {
+    const [filas] = await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM usuarios WHERE id = ?`, [id]);
+    return filas.length > 0 ? publico(filas[0]) : undefined;
 }
 
-//REGISTRAR 
+//crear
 
 async function crear({nombre, correo, contrasenaHash, boleta, rol}) {
+    await revisarDuplicado({correo, boleta})
+
     const [info] = await pool.query(
-        `INSERT INTO usuarios (nombre, correo, contrasena_hash), (?, ?, ?, ?, ?)`, [nombre, correo, contrasenaHash, boleta, rol || 'alumno']
-    );
+        `INSERT INTO usuarios (nombre, correo, contrasena_hash, boleta, rol) VALUES (?, ?, ?, ?, ?)`,
+        [nombre, correo, contrasenaHash, boleta, rol || "alumno"]
+    )
 
     return obtenerPorId(info.insertId);
-
-
-    
 }
+
+//Actualizar
 
 async function actualizar(id, {nombre, correo, rol}) {
+    const usuarioExistente = await obtenerPorId(id);
+    if (!usuarioExistente) return undefined;
 
-    const cambios = Object.entries({nombre, correo, rol}).filter(([, valor])=> valor !== undefined);
-    if(cambios.length ===0) return obtenerPorId(id);
+    await revisarDuplicado({ correo }, id);
 
-    const columnas = cambios.map(([columna])=> `${columna} = ?`).join(', ');
+    const cambios = Object.entries({ nombre, correo, rol }).filter(([, valor]) => valor !== undefined);
+    if (cambios.length === 0) {
+        return obtenerPorId(id);
+    }
 
-    const [info] = await pool.query(`UPDATE usuarios SET ${columnas} WHERE id = ?`, [...cambios.map(([ , valor])=> valor), id]);
+    const columnas = cambios.map(([columna]) => `${columna} = ?`).join(", ");
+    const valores = cambios.map(([, valor]) => valor);
 
-
-    // si lo encuentra
-
-    if(info.affectedRows === 0) return undefined;
+    await pool.query(`UPDATE usuarios SET ${columnas} WHERE id = ?`, [...valores, id]);
     return obtenerPorId(id);
-    
-  
 }
 
-// eliminar 
+//eliminar
 
-async function elimnarPorId(id) {
-    const[filas] =await pool.query(`DELETE FROM usuarios WHERE id= ? `, [id]);
-
+async function eliminar(id) {
+    const [info] = await pool.query(`DELETE FROM usuarios WHERE id = ?`, [id]);
     return info.affectedRows > 0;
-    
 }
 
 //buscar por correo hash
 
 async function buscarPorCorreoConHash(correo) {
-     const[filas] =await pool.query('SELECT* FROM usuarios WHERE correo = ?', [correo]);
-
-    return filas[0];
-    
-    
+    const [filas] = await pool.query("SELECT * FROM usuarios WHERE LOWER(correo) = LOWER(?)", [correo]);
+    return filas.length > 0 ? { ...filas[0] } : undefined;
 }
 
-//debemos crear los modelos de las tablas talleres y asistencia 
-//taller tiene registrar alumno al taller,
+module.exports = {listar, obtenerPorId, crear , actualizar, eliminar, buscarPorCorreoConHash}
 
-
-//asistencia tiene registrar asistencia, consultar asistencia del taller 
-// dos archivvvos (talleres y asistencia_modelo)
-
-
-
-
-//oara hacer esto a una api hay que exportar
-
-
-module.exports= {listar, obtenerPorId, crear, actualizar, elimnarPorId, buscarPorCorreoConHash}
+//deberan de crear los modelos de las tablas talleres y asistencia 
+//taller tiene registrar alumno al taller, consultar todos los talleres talleres_modelo.js
+//asistencia tiene registrar asistencia, consultar asistencia de taller asistencia_modelo.js
+//
