@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const UsuariosModel = require('../Modelo/usuario_modelo');
+const UsuariosModel = require('../Modelo/usuarios_modelo');
 const { validarCorreo, validarBoleta, validarContrasena } = require('../validaciones');
 
 function esDuplicado(error) {
@@ -75,35 +75,3 @@ async function eliminarUsuario(req, res) {
 }
 
 module.exports = { listarUsuarios, obtenerUsuario, crearUsuario, actualizarUsuario, eliminarUsuario }
-//deberan realizar los controladores de asistencia y talleres con sus funciones correspondientes
-
-
-
-
-
-
-
-    try{
-        const usuario = await usuariosModel.actualizar(req.params.id, {nombre, correo, rol});
-        if(!usuario) return res.status(404).json({error: 'usuario no enontrado'});
-        res.json(usuario);
-    } catch(error) {
-        if(esDupiclado(error)) return res.status(400).json({error: 'Ya exsite un usuario con ese correo'});
-        res.status(500).json({error: error.message});
-    }
-
-
-async function eliminarUsuario(req, res) {
-
-    try{
-
-        const eliminado = await usuariosModel.elimnarPorId(req.params.id);
-        if(!eliminado) return res.status(404).json({error: 'no se encontro el usuario'});
-        res.status(204).send();
-    }catch(error){
-        res.status(500).json({error : error.message});
-    }
-    
-}
-
-module.exports = {listarUsuarios, obtenerUsuario, crearUsuario, actualizarUsuario, eliminarUsuario}

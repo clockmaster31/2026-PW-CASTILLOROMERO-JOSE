@@ -42,4 +42,4 @@ async function crear({nombre, instructor, fecha, cupo}) {
     return filas[0];
 }
 
-module.exports = {listar, obtenerPorId, crear}
+module.exports = {listar, obtenerPorId, crear, registrarAlumnoTaller}
