@@ -13,3 +13,5 @@
  .lista a { color: #6b1d3a; font-weight: 600;}
  .buscador { width: 100%; max-width: 360px; margin-bottom: 16px; box-sizing: border-box;}
 
+.insignia { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #166534; font-size: 12px; font-weight: 600; }
+.nuevo { background: #fef9c3; }

@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs');
 const UsuariosModel = require('../Modelo/usuarios_modelo');
-const { validarCorreo, validarBoleta, validarContrasena } = require('../validaciones');
-
+const { validarNombre, validarCorreo, validarBoleta, validarContrasena } = require('../validaciones');
 function esDuplicado(error) {
     return error.code === 'ER_DUP_ENTRY' || error.code === '23505';
 }
@@ -26,19 +25,28 @@ async function obtenerUsuario(req, res) {
 }
 
 async function crearUsuario(req, res) {
-    const { nombre, correo, contrasena, boleta, rol } = req.body;
+    const { nombre, correo, contrasena, boleta } = req.body ?? {};
     if (!nombre || !correo || !contrasena || !boleta) {
         return res.status(400).json({ error: 'nombre, correo, contrasena y boleta son obligatorios' });
     }
+    if (!validarNombre(nombre)) {
+        return res.status(400).json({ error: 'El nombre debe tener de 3 a 100 caracteres, solo letras y espacios' });
+    }
     if (!validarCorreo(correo)) return res.status(400).json({ error: 'El correo no tiene un formato válido' });
-    if (!validarBoleta(boleta)) return res.status(400).json({ error: 'La boleta debe tener 10 dígitos' });
+    if (!validarBoleta(boleta)) return res.status(400).json({ error: 'La boleta no es válida (10 dígitos, formato 20XX...)' });
     if (!validarContrasena(contrasena)) {
-        return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+        return res.status(400).json({ error: 'La contraseña debe tener de 8 a 72 caracteres, con al menos una letra y un número' });
     }
 
     try {
         const contrasenaHash = await bcrypt.hash(contrasena, 10);
-        const usuario = await UsuariosModel.crear({ nombre, correo, contrasenaHash, boleta, rol });
+        const usuario = await UsuariosModel.crear({
+            nombre: nombre.trim().replace(/\s+/g, ' '),
+            correo: correo.trim().toLowerCase(),
+            contrasenaHash,
+            boleta: boleta.trim(),
+            rol: 'alumno',
+        });
         res.status(201).json(usuario);
     } catch (error) {
         if (esDuplicado(error)) return res.status(409).json({ error: 'Ya existe un usuario con ese correo o boleta' });
