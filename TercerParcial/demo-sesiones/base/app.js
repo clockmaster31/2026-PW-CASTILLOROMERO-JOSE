@@ -251,7 +251,11 @@ return app;
 
 module.exports = {crearApp, NOMBRE_COOKIE}
 
-//TAREA, realizar INFOGRAFIA, sobre la autentificacion con el uso de jwt, como se implenta en js 
+//TAREA, realizar INFOGRAFIA, sobre la autentificacion con el uso de jwt, como se implenta en js para el domingo 
+
+//tarea 2, con el uso del archivo que se nos va a proveer, completar y realizar pruebas al ejercicio de sesiones
+//  en el archivo llamado (xxxx)(front) para implementear en el archivo demo.js se evaluara la siguiente clase.
+//s
 
 
 
