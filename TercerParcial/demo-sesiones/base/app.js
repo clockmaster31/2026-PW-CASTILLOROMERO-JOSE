@@ -115,5 +115,144 @@ function requereSession(req, res, next){
 
 }
 
+// existen tokens fisicos(usb para acceder), unicos(), y doble autenticacion.
+function requereRol(rol){
+  return (req, res, next) =>{
+    if(req.sesion.usuario.rol !== rol){
+      return res.status(403).json({error: ` Eres ${req.session.usuario.usuario}, pero esta ruta es solo para ${rol}`});
+        }
+        next();
+  };
+
+
+}
+
+//vamos a definir rutas de acceso para un usuario visitante, sin que inicie sesion 
+//esto fuerza que se tiene que identificar 
+
+app.get('/api/config', (req, res) => {
+  res.json(config);
+});
+
+app.post('/api/visita',(req,res)=>{
+  if(!req.sesion) return res.status(401).json({error: 'no tiene acceso'});
+
+  //de ser asi y entra al idenfificarse, se genera un contador de cuantas veces entro
+  req.sesion.visitas = (req.session.visitas || 0) + 1;
+  //cada que visite se genera una visita
+  res.json({visitas: req.sesion.visitas, sesion: idCorto(req.session.id)});
+
+
+});
+
+app.post('/api/login', async (req, res) => {
+  try{
+    const {usuario, contrasena} = req.body || {}; //vacio para pureba en postman
+    //verificamos que el usuario y contrasena sean correctos, si no, regresamos 401
+    const datos = await usuarios.verificar(usuario,contrasena);
+    if(!datos) return res.status(401).json({error: 'Usuario o contrasena incorrecto o no encontrado... Intente otravez'});
+
+    //checa si se ha visitados antes de lasesion
+    const antes = req.sesion.visitas !== undefined ? idCorto(req.session.id) : null;
+    const visitas = req.sesion.visitas || 0;
+
+    //guardar los datos de la sesion
+
+    const guardar = () => {
+      //vamos a crear guardar para guardar los datos de la sesion 
+      req.sesion.usuario = datos;
+      req.sesion.visitas = visitas;
+      req.sesion.creada = Date.now();
+      req.sesion.ultimoUso = Date.now();
+
+      //ahora si vanmos a guardar
+
+      req.sesion.save((error) =>{
+        if(error) return next(error);
+        res.json({usuarios:datos, sesionAntes:antes, sesionDespues : idCorto(req.sesionID)});
+      });
+
+
+    };
+
+    //para regenerar la sesion si se colapsa o algo como sis e
+    if(config.regenerarAlEntrar){
+      
+      req.sesion.regenerate((error) => (error ? next(error) : guardar()));
+      } else{
+        guardar();
+      }
+
+  }catch(error){
+    next(error);
+  }
+
+  });
+
+//vamos a cerrar la sesion
+
+app.post('/api/logout',(req, res, next) => {
+  req.sesion.destroy((error) => {
+    if(error) return next(error);
+    res.clearCookie(NOMBRE_COOKIE);
+    res.json({message: 'Session cerrada'});
+  });
+});
+
+//verificar la sesion y iniciar sesion
+
+app.get('/api/sesion', requiereSesion, (req,res)=>{
+const desde = config.rolling ? req.sesion.ultimoUso : req.sesion.creada;
+res.json({usuario: req.sesion.usuario, sesion : idCorto(req.sesionID),
+  expiraEnSegundos : Math.round((desde + config.maxAge - Date.now())/1000),
+});
+});
+
+//ver perfil 
+
+app.get('/api/perfil', requiereSesion, (req,res)=>{
+  req.sesion.visitas=(req.sesion.visitas || 0) + 1;
+  res.json({message: `Hola ${req.sesion.usuario.nombre} rol: ${req.sesion.usuario.rol}, visitas: ${req.sesion.visitas}`});
+  });
+
+  // para pruebas unitarias vamos a poner lo que sigue estas madres para verificar 
+  //verdadero o falso lo que se ejecuto 
+
+  app.get('/api/diagnostico/sesiones', async(req,res,next)=>{
+    try{
+      const sesiones = await todasLasSesiones(almacen);
+      const lista = Object.entries(sesiones || {}).map(([id, s])=>({
+        sesion : idCorto(id), 
+        esLaTuya : id=== req.sesionID,
+        usuario : s.usuario ? s.usuario : 'Sin iniciar sesion',
+        visitas: s.visitas || 0,
+        expira: s.cookie && s.cookie.expires,
+
+      }));
+      res.json({almacen: config.almacen, sesiones : lista });
+
+    } catch (error){
+      next(error);
+    }
+  });
+
+
+  app.use(express.static(path.join(__dirname, 'public')));
+
+  app.use((error, req, res, next) => {
+    console.error(error);
+    res.status(500).json({error: 'Error del servidor'});
+  });
+
+app.use('/api/', (req, res) => res.status(404).json({error: 'Ruta no encontrada'}));
+
+
+return app;
+
+module.exports = {crearApp, NOMBRE_COOKIE}
+
+//TAREA, realizar INFOGRAFIA, sobre la autentificacion con el uso de jwt, como se implenta en js 
+
+
 
 
