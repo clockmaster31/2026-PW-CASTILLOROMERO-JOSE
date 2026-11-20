@@ -10,7 +10,15 @@ const MySQLStore = require('express-mysql-session')(session);
 
 const { crearModeloUsuarios } = require('./modelos/usuarios.modelo');
 
+const crypto = require('crypto');
+
+const jwt = require('jsonwebtoken');
+
+const {crearMModeloTokens} = require('./modelos/tokens.modelo');
+
 const NOMBRE_COOKIE = 'connect.sid';
+
+
 
 // si es que hay una sesion, hay que extraer del almacen
 // (del archivo temporal) si no, crearla
@@ -396,6 +404,123 @@ function crearApp(config, pool) {
     res.status(404).json({ error: 'Ruta no encontrada' })
   );
 
+
+  //implementar jwt 
+
+  const SECRETO_JWT = config.jwtSecreto || process.env.jwtSecreto||'secreto-jwt-solo-para-esta-demo';
+
+  //vamos a crear una funcion para verrificar que el token sea autentico sino hace kaboom 
+
+  function firmarToken(usuario){
+    return jwt.sign(
+      {
+        //payload, lo que se va a firmar, lo que se va a cifrar
+        sub : String(usuario.id),
+        usuario : usuario.usuario,
+        nombre : usuario.nombre,
+        rol: usuario.rol
+      },SECRETO_JWT,{
+        //ALGORITMO PARA CIFRAR
+        algorithm : 'HS256',
+        expiresIn : config.jwtExpiraSeg, //5 minutos
+        jwtid : crypto.randomUUID() //identificador unico del token
+      }
+    );
+  }
+
+
+  //HACER UNA FUNCION PARa validar quien requiere o no un token dentro de la app (visitas, admin usuario ) por medio de middleware 
+
+  
+  async function requiereJWT(req, res, next){
+    const encabezado = req.headers.autorization || '';
+    if(!encabezado.startWith('Bearer ')){
+      return res.status(401).json({error : 'falta un token asociado'});
+    }
+    const token = encabezado.slice('Bearer '.length);
+
+    let datos;
+    try{
+      datos = jwt.verify(token,SECRETO_JWT, {algorithms : ['HS256']});
+    } catch(error){
+      if (error === 'TokenExpiredError'){
+        return res.status(401).json({error : '401 token Expirado, porfavor renuevelo'});
+      }
+      return res.status(401).json({
+        error : '401 Token Invalido'
+      });
+    }
+
+    try{
+      if(config.jwtRevocar && (await token.estaRevocado(datos.jti))){
+        return res.status(401).json({error: 'token revocado'});
+
+        }
+      }catch(error){
+        return next(error);
+      }
+      req.jwt = datos;
+      next();
+  }
+
+    //vamos a ser de que no sea del rol
+  //403 valido pero no del rol
+
+  function requiereRolJWT(rol){
+    return (req, res, next) =>{
+      if(req.jwt.rol !== rol){
+        return res.status(403).json({error: `Eres ${req.jwt.usuario} pero esta ruta solo accede ${rol}`});
+        }
+        next();
+      };
+    
+    }
+
+    app.post('/api/jwt/login', async(req,res, next)=>{
+      try{
+  const {usuario, contrasena} = req.body || {};
+  const datos = await usuario.verificar(usuario, contrasena);
+  if(!datos) return res.status(401).json({error: 'usuario ocontraseña incorrectos'});
+  res.json({token: firmarToken(datos), usuario : datos});
+} catch(error){
+  next(error);
+}
+    });
+
+
+    app.get('/api/jwt/perfil', requiereJWT, (req, res, next)=>{
+      res.json({
+        mensaje: `hola ${req.jwt.nombre}`,
+        rol: req.jwt.rol,
+        expiraEnSegundos : Math.max(0, req.jwt.exp - Math.floor(Date.now()/1000)),
+        }
+      );
+      });
+
+
+      //ruta para admin
+
+      app.get('/api/jwt/admin/reporte', requiereJWT, requiereRol('admin'), (req, res) =>{
+        res.json({reporte: 'talleres :3'});
+        });
+
+      app.post('/api/jwt/refresh', requiereJWT, (req,res) =>{
+        const {sub, usuario, rol} = req.jwtM
+        res.json({token : firmarToken({ id: sub, usuario, nombre, rol})});
+        });
+
+
+      app.post('/api/jwt/logout', requiereJWT, async(req, res, next)=>{
+        try{
+          if(config.jwtRevocar){
+            await tokens.revocar(req.jwt.jti, req.jwt.usuario, req.jwt.exp);
+            return res.json({mensaje: 'token revocado en el servidor, se registra en la lista negra'});
+          }
+          res.json({mensaje: 'el server no guarda nada'});
+        } catch(error){
+          next(error);
+        }});
+
   return app;
 
 }
@@ -406,3 +531,5 @@ module.exports = { crearApp, NOMBRE_COOKIE };
 //completar y realizar pruebas al ejercicio de sesiones
 //en el archivo llamado (xxxx)(front) para implementear
 //en el archivo demo.js se evaluara la siguiente clase.
+
+
