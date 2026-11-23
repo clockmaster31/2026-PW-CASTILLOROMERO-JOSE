@@ -1,13 +1,21 @@
-// La página solo hace fetch a la API. El navegador manda la cookie solo (misma página, mismo servidor).
+
+ // La página solo hace fetch a la API. Para JWT manda el token en Authorization.
 
 const $ = (id) => document.getElementById(id);
 
+// Token JWT recibido al iniciar sesión
+let tokenJWT = null;
+
 //Esta es una sola funcion que habla con la API para que no se repita el fetch en cada boton. Siempre regresa {status, datos} ya que fetch no marca error con 401 o 403
 //Solo mando Content-Type cuando hay cuerpo, porque sin él express.json() no lee el body del login.
-// No uso credentials: 'include' porque la página y la API están en el mismo servidor y el navegador manda la cookie solo.
+// El token se manda en Authorization cuando existe, para autenticar las peticiones.
 async function llamar(metodo,url,body)
 {
     const options={method: metodo,headers:{}};
+
+    if(tokenJWT){
+        options.headers['Authorization'] = `Bearer ${tokenJWT}`;
+    }
 
     if(body!==undefined){
         options.headers['Content-Type']='application/json';
@@ -35,7 +43,7 @@ function claseDelCodigo(status){
 }
 
 //En esta funcion creo los elementos con createElement y textContent (no innerHTML) porque los datos vienen del servidor
-//y podrían traer código; con innerHTML se ejecutaría  y podría robar la cookie si no fuera httpOnly.
+//y podrían traer código; con innerHTML se ejecutaría.
 //Uso prepend para que la respuesta más nueva quede arriba.
 function anotar(method,url,status,datos){
     const li=document.createElement('li');
@@ -56,22 +64,25 @@ function anotar(method,url,status,datos){
     $('bitacora').prepend(li);
 }
 
-//Esta funcion le pregunta al servidor quién soy porque mi JS no puede saberlo por sí mismo ya que la cookie es httpOnly.
-//Muestro document.cookie para comprobar que, aunque haya sesión, JavaScript no ve la cookie.
+//Esta funcion le pregunta al servidor quién soy porque mi JS no puede saberlo por sí mismo.
+//Muestro document.cookie para comprobar que JWT se manda en el encabezado Authorization.
 async function refrescarEstado() {
-    const { status, datos } = await llamar('GET', '/api/sesion');
-  const estado = $('estado');
+    const { status, datos } = await llamar('GET', '/api/jwt/perfil');
+    const estado = $('estado');
 
-  if (status === 200) {
-    const u = datos.usuario;
-    estado.textContent = `Con sesión: ${u.nombre} (rol: ${u.rol}) · sesión ${datos.sesion} · vence en ${datos.expiraEnSegundos} s`;
-    estado.className = 'estado con-sesion';
-  } else {
-    estado.textContent = `Sin sesión (el servidor responde ${status})`;
-    estado.className = 'estado sin-sesion';
-  }
+    if (status === 200) {
+        estado.textContent = `Autenticado con JWT: ${datos.mensaje} · Rol: ${datos.rol} · vence en ${datos.expiraEnSegundos} s`;
+        estado.className = 'estado con-sesion';
+    } else {
+        estado.textContent = `Sin autenticación JWT (el servidor responde ${status})`;
+        estado.className = 'estado sin-sesion';
 
-  $('cookie-js').textContent = document.cookie || '(vacío)';
+        if(status === 401){
+            tokenJWT = null;
+        }
+    }
+
+  $('cookie-js').textContent = '(JWT: no se utiliza cookie de sesión)';
     
 }
 
@@ -143,7 +154,6 @@ async function refrescarTabla() {
 //Esta funcion junta estado y tabla porque después de cada acción de los botones hay que actualizar los dos, así no repito las dos llamadas en cada evento.
 async function refrescarTodo() {
   await refrescarEstado();
-  await refrescarTabla();
 }
 
 // Uso preventDefault para evitar que el formulario recargue la página, así hago el login con fetch y no pierdo la bitácora.
@@ -155,8 +165,15 @@ $('form-login').addEventListener('submit', async (evento) => {
     contrasena: $('contrasena').value,
   };
 
-  const { status, datos } = await llamar('POST', '/api/login', cuerpo);
-  anotar('POST', '/api/login', status, datos);
+  const { status, datos } = await llamar('POST', '/api/jwt/login', cuerpo);
+
+  if(status === 200 && datos && datos.token){
+      tokenJWT = datos.token;
+  }else{
+      tokenJWT = null;
+  }
+
+  anotar('POST', '/api/jwt/login', status, datos);
   await refrescarTodo();
 });
 
@@ -173,6 +190,11 @@ document.querySelectorAll('button[data-url]').forEach((boton) => {
     const url = boton.dataset.url;
 
     const { status, datos } = await llamar(metodo, url);
+
+    if(url === '/api/jwt/logout' && status === 200){
+        tokenJWT = null;
+    }
+
     anotar(metodo, url, status, datos);
     await refrescarTodo();
   });
@@ -180,7 +202,8 @@ document.querySelectorAll('button[data-url]').forEach((boton) => {
 
 //Paso la función sin paréntesis para que se ejecute en cada clic y no una sola vez al cargar.
 $('btn-refrescar').addEventListener('click', refrescarTodo);
-$('btn-sesiones').addEventListener('click', refrescarTabla);
+//El botón de sesiones ya no se usa con JWT.
+//$('btn-sesiones').addEventListener('click', refrescarTabla);
 
 //Con esta funcion al abrir la página muestro la configuración y el estado sin esperar un clic.
 //Como el <script> está al final del <body> y los elementos ya existen.
@@ -192,4 +215,3 @@ async function iniciar() {
 }
 
 iniciar();
-    

@@ -1,4 +1,3 @@
-
 const path = require('path');
 const express = require('express');
 
@@ -14,7 +13,7 @@ const crypto = require('crypto');
 
 const jwt = require('jsonwebtoken');
 
-const {crearMModeloTokens} = require('./modelos/tokens.modelo');
+const { crearModeloTokens } = require('./modelos/tokens.modelo');
 
 const NOMBRE_COOKIE = 'connect.sid';
 
@@ -49,6 +48,7 @@ function crearApp(config, pool) {
 
   //obtener modelo de la bd
   const usuarios = crearModeloUsuarios(pool);
+  const tokens = crearModeloTokens(pool);
 
   //aqui debemos identificar la sesion sera por tabla en bd
   // o la sesion solo sera una cookie del navegador.
@@ -400,14 +400,9 @@ function crearApp(config, pool) {
 
   });
 
-  app.use('/api/', (req, res) =>
-    res.status(404).json({ error: 'Ruta no encontrada' })
-  );
-
-
   //implementar jwt 
 
-  const SECRETO_JWT = config.jwtSecreto || process.env.jwtSecreto||'secreto-jwt-solo-para-esta-demo';
+  const SECRETO_JWT = config.jwtSecreto || process.env.JWT_SECRET || 'secreto-jwt-solo-para-esta-demo';
 
   //vamos a crear una funcion para verrificar que el token sea autentico sino hace kaboom 
 
@@ -431,10 +426,10 @@ function crearApp(config, pool) {
 
   //HACER UNA FUNCION PARa validar quien requiere o no un token dentro de la app (visitas, admin usuario ) por medio de middleware 
 
-  
+
   async function requiereJWT(req, res, next){
-    const encabezado = req.headers.autorization || '';
-    if(!encabezado.startWith('Bearer ')){
+    const encabezado = req.headers.authorization || '';
+    if(!encabezado.startsWith('Bearer ')){
       return res.status(401).json({error : 'falta un token asociado'});
     }
     const token = encabezado.slice('Bearer '.length);
@@ -443,8 +438,8 @@ function crearApp(config, pool) {
     try{
       datos = jwt.verify(token,SECRETO_JWT, {algorithms : ['HS256']});
     } catch(error){
-      if (error === 'TokenExpiredError'){
-        return res.status(401).json({error : '401 token Expirado, porfavor renuevelo'});
+      if (error.name === 'TokenExpiredError'){
+        return res.status(401).json({error : '401 token Expirado, porfavor renueelo'});
       }
       return res.status(401).json({
         error : '401 Token Invalido'
@@ -452,7 +447,7 @@ function crearApp(config, pool) {
     }
 
     try{
-      if(config.jwtRevocar && (await token.estaRevocado(datos.jti))){
+      if(config.jwtRevocar && (await tokens.estaRevocado(datos.jti))){
         return res.status(401).json({error: 'token revocado'});
 
         }
@@ -473,13 +468,13 @@ function crearApp(config, pool) {
         }
         next();
       };
-    
+
     }
 
     app.post('/api/jwt/login', async(req,res, next)=>{
       try{
   const {usuario, contrasena} = req.body || {};
-  const datos = await usuario.verificar(usuario, contrasena);
+  const datos = await usuarios.verificar(usuario, contrasena);
   if(!datos) return res.status(401).json({error: 'usuario ocontraseña incorrectos'});
   res.json({token: firmarToken(datos), usuario : datos});
 } catch(error){
@@ -500,13 +495,13 @@ function crearApp(config, pool) {
 
       //ruta para admin
 
-      app.get('/api/jwt/admin/reporte', requiereJWT, requiereRol('admin'), (req, res) =>{
+      app.get('/api/jwt/admin/reporte', requiereJWT, requiereRolJWT('admin'), (req, res) =>{
         res.json({reporte: 'talleres :3'});
         });
 
       app.post('/api/jwt/refresh', requiereJWT, (req,res) =>{
-        const {sub, usuario, rol} = req.jwtM
-        res.json({token : firmarToken({ id: sub, usuario, nombre, rol})});
+        const { sub, usuario, nombre, rol } = req.jwt;
+        res.json({ token: firmarToken({ id: sub, usuario, nombre, rol }) });
         });
 
 
@@ -521,6 +516,10 @@ function crearApp(config, pool) {
           next(error);
         }});
 
+  app.use('/api/', (req, res) =>
+    res.status(404).json({ error: 'Ruta no encontrada' })
+  );
+
   return app;
 
 }
@@ -531,5 +530,3 @@ module.exports = { crearApp, NOMBRE_COOKIE };
 //completar y realizar pruebas al ejercicio de sesiones
 //en el archivo llamado (xxxx)(front) para implementear
 //en el archivo demo.js se evaluara la siguiente clase.
-
-

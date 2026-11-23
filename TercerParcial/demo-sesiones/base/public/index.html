@@ -14,12 +14,12 @@
 
   <main>
     <section class="tarjeta" id="tarjeta-estado">
-      <h2>1 · ¿Quién soy para el servidor?</h2>
-      <p id="estado" class="estado sin-sesion">Sin sesión</p>
-      <p class="detalle">Lo que el JavaScript de esta página puede leer con <code>document.cookie</code>:</p>
-      <pre id="cookie-js">(vacío)</pre>
-      <button id="btn-refrescar" type="button">Volver a preguntar</button>
-    </section>
+  <h2>1 · ¿Quién soy para el servidor?</h2>
+  <p id="estado" class="estado sin-sesion">Sin autenticación JWT</p>
+  <p class="detalle">El JavaScript envía el token mediante el encabezado Authorization:</p>
+  <pre id="cookie-js">(JWT: no se utiliza cookie de sesión)</pre>
+  <button id="btn-refrescar" type="button">Volver a preguntar</button>
+</section>
 
     <section class="tarjeta">
       <h2>2 · Iniciar sesión</h2>
@@ -40,15 +40,26 @@
     </section>
 
     <section class="tarjeta">
-      <h2>3 · Pedirle cosas al servidor</h2>
-      <div class="botones">
-        <button type="button" data-metodo="POST" data-url="/api/visita">POST /api/visita</button>
-        <button type="button" data-metodo="GET" data-url="/api/perfil">GET /api/perfil</button>
-        <button type="button" data-metodo="GET" data-url="/api/admin/reporte">GET /api/admin/reporte</button>
-        <button type="button" data-metodo="POST" data-url="/api/logout" class="peligro">POST /api/logout</button>
-      </div>
-      <ol id="bitacora" class="bitacora" reversed></ol>
-    </section>
+  <h2>3 · Pedirle cosas al servidor</h2>
+  <div class="botones">
+    <button type="button" data-metodo="GET" data-url="/api/jwt/perfil">
+      GET /api/jwt/perfil
+    </button>
+
+    <button type="button" data-metodo="GET" data-url="/api/jwt/perfil">
+      Consultar perfil
+    </button>
+
+    <button type="button" data-metodo="GET" data-url="/api/jwt/admin/reporte">
+      GET /api/jwt/admin/reporte
+    </button>
+
+    <button type="button" data-metodo="POST" data-url="/api/jwt/logout" class="peligro">
+      POST /api/jwt/logout
+    </button>
+  </div>
+  <ol id="bitacora" class="bitacora" reversed></ol>
+</section>
 
     <section class="tarjeta">
       <h2>4 · Lo que guarda el servidor</h2>
